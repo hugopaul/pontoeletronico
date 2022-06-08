@@ -17,4 +17,7 @@ public interface ColaboradorRepository extends JpaRepository<Colaborador, UUID> 
 
     @Query(value = "select * from pontoeletronico.tb_colaborador where username like :username", nativeQuery = true)
     Optional<Colaborador> findByUsername(@Param("username") String username);
+
+    @Query(value = "select cd_colaborador from pontoeletronico.tb_colaborador where username like :username", nativeQuery = true)
+    UUID getUUIDfromUsername(@Param("username") String username);
 }

@@ -1,7 +1,9 @@
 package br.com.imsodontologia.pontoeletronico.controller;
 
 import br.com.imsodontologia.pontoeletronico.model.Colaborador;
-import br.com.imsodontologia.pontoeletronico.model.Perfil;
+import br.com.imsodontologia.pontoeletronico.model.PassMatches;
+import br.com.imsodontologia.pontoeletronico.model.PerfilOfColaboradorDTO;
+import br.com.imsodontologia.pontoeletronico.model.TokenDTO;
 import br.com.imsodontologia.pontoeletronico.service.ColaboradorService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.UUID;
 
@@ -36,6 +39,12 @@ public class ColaboradorController {
     public Colaborador getById(@PathVariable UUID cdColaborador) {
         return this.colaboradorService.getById(cdColaborador);
     }
+    @PreAuthorize("hasAnyRole('USER')")
+    @PostMapping(value = "/username")
+    @ResponseStatus(HttpStatus.OK)
+    public Colaborador getByUsername(@RequestBody TokenDTO tokenDTO) {
+        return this.colaboradorService.getByToken(tokenDTO);
+    }
 
     @PreAuthorize("hasAnyRole('GERENTE')")
     @GetMapping("/all")
@@ -56,6 +65,20 @@ public class ColaboradorController {
     @ResponseStatus(HttpStatus.ACCEPTED)
     public Colaborador addPerfil(@PathVariable UUID cdColaborador, @RequestBody PerfilOfColaboradorDTO perfilOfColaboradorDTO){
         return this.colaboradorService.addRolesToUser(cdColaborador, perfilOfColaboradorDTO);
+    }
+
+    @PreAuthorize("hasAnyRole('USER')")
+    @PostMapping("/matchPass")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public Boolean matchPass(@RequestBody PassMatches passMatches){
+        return this.colaboradorService.matchPass(passMatches);
+    }
+    @PreAuthorize("hasAnyRole('USER')")
+    @PutMapping("/setNewPass/{cdColaborador}")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public Colaborador setNewPass(@PathVariable UUID cdColaborador, @RequestBody Colaborador colaborador, HttpServletRequest request) {
+        System.out.println("token --> " + request.getHeader("Authorization").substring(7));
+        return this.colaboradorService.setNewPass(cdColaborador, colaborador, request.getHeader("Authorization").substring(7));
     }
 
 }

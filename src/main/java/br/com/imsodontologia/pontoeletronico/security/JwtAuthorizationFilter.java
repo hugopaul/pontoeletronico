@@ -34,17 +34,9 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain chain) throws IOException, ServletException {
-       /* String header = request.getHeader("Authorization");
-        if (header != null && header.startsWith("Bearer ")) {
-            UsernamePasswordAuthenticationToken auth = getAuthentication(header.substring(7));
-            if (auth != null) {
-                SecurityContextHolder.getContext().setAuthentication(auth);
-            }
-        }
-        chain.doFilter(request, response);*/
 
         String header = request.getHeader("Authorization");
-
+        log.info("dofilter internal header -----> " + header);
         if (header == null || !header.startsWith("Bearer ")) {
             chain.doFilter(request, response);
             return;
@@ -66,7 +58,9 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
     }*/
     private UsernamePasswordAuthenticationToken getAuthentication(HttpServletRequest request) {
         String token = request.getHeader("Authorization");
+        log.info("log recebido ----> " + token);
         String username = jwtUtil.getUsername(token.substring(7));
+        log.info("username encontrado ---- > " + username);
 
         if (token != null) {
             // parse the token.

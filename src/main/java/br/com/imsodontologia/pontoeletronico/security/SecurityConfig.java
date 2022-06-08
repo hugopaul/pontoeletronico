@@ -1,23 +1,27 @@
 package br.com.imsodontologia.pontoeletronico.security;
 
+
 import br.com.imsodontologia.pontoeletronico.service.impl.UserDetailsServiceImpl;
-import io.jsonwebtoken.Jwt;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
+
+import java.util.Arrays;
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -46,6 +50,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 //.antMatchers(HttpMethod.GET, "/lancamento/colaborador/**").hasRole("GERENTE")
                 //.antMatchers(HttpMethod.GET, "/lancamento/all", "/lancamento/**").hasRole("GERENTE")
                 //.antMatchers("/**").hasRole("PROPRIETARIO")
+                .antMatchers(HttpMethod.POST, "/login").permitAll()
                 .anyRequest().authenticated();
                         //.anyRequest().permitAll();
         httpSecurity.cors().and().csrf().disable();
@@ -55,10 +60,24 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     @Bean
-    CorsConfigurationSource corsConfiguration(){
-        final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", new CorsConfiguration().applyPermitDefaultValues());
-        return source;
+    public FilterRegistrationBean<CorsFilter> corsFilterFilterRegistrationBean(){
+        List<String> all = Arrays.asList("*");
+
+        CorsConfiguration corsConfiguration = new CorsConfiguration();
+        corsConfiguration.setAllowedOrigins(List.of("http://localhost:4200"));
+        corsConfiguration.setAllowedHeaders(all);
+        corsConfiguration.setAllowedMethods(all);
+        corsConfiguration.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", corsConfiguration);
+
+        CorsFilter corsFilter = new CorsFilter(source);
+        FilterRegistrationBean<CorsFilter> filter = new FilterRegistrationBean<>(corsFilter);
+        filter.setOrder(Ordered.HIGHEST_PRECEDENCE);
+
+        return filter;
+
     }
 
     @Override

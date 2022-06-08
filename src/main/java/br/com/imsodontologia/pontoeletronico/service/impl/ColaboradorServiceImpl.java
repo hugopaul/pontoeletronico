@@ -1,13 +1,14 @@
 package br.com.imsodontologia.pontoeletronico.service.impl;
 
-import br.com.imsodontologia.pontoeletronico.controller.PerfilOfColaboradorDTO;
+import br.com.imsodontologia.pontoeletronico.model.PassMatches;
+import br.com.imsodontologia.pontoeletronico.model.PerfilOfColaboradorDTO;
 import br.com.imsodontologia.pontoeletronico.model.Colaborador;
-import br.com.imsodontologia.pontoeletronico.model.Perfil;
+import br.com.imsodontologia.pontoeletronico.model.TokenDTO;
 import br.com.imsodontologia.pontoeletronico.repository.ColaboradorRepository;
+import br.com.imsodontologia.pontoeletronico.security.JwtUtil;
 import br.com.imsodontologia.pontoeletronico.service.ColaboradorService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.json.GsonJsonParser;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -15,7 +16,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 
 @Slf4j
@@ -27,6 +27,10 @@ public class ColaboradorServiceImpl implements ColaboradorService {
 
     @Autowired
     private BCryptPasswordEncoder bCryptPasswordEncoder;
+
+
+    @Autowired
+    private JwtUtil jwtUtil;
 
 
     public ColaboradorServiceImpl(ColaboradorRepository colaboradorRepository) {
@@ -65,12 +69,48 @@ public class ColaboradorServiceImpl implements ColaboradorService {
     @Override
     public Colaborador addRolesToUser(UUID cdColaborador, PerfilOfColaboradorDTO perfilOfColaboradorDTO) {
         Optional<Colaborador> colaborador = this.colaboradorRepository.findById(cdColaborador);
-        if (colaborador.isEmpty()){
+        if (colaborador.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Colaborador não encontrado");
         }
         colaborador.get().setPerfis(perfilOfColaboradorDTO.getPerfisToAdd());
         log.info(String.valueOf(colaborador.get()));
         return this.colaboradorRepository.save(colaborador.get());
     }
+
+    @Override
+    public Colaborador getByToken(TokenDTO tokenDTO) {
+
+        String username = jwtUtil.getUsername(tokenDTO.getToken());
+        if (username.equals(tokenDTO.getType())) {
+            Optional<Colaborador> colaborador = this.colaboradorRepository.findByUsername(username);
+            if (colaborador.isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Colaborador não encontrado");
+            }
+            return colaborador.get();
+        }
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "usuario não bate com token enviado!");
+    }
+
+    @Override
+    public Boolean matchPass(PassMatches passMatches) {
+
+        return bCryptPasswordEncoder.matches(passMatches.getPassToMatch(), passMatches.getEncryptedPass());
+    }
+
+    @Override
+    public Colaborador setNewPass(UUID cdColaborador, Colaborador colaborador, String token) {
+        String username = jwtUtil.getUsername(token);
+        if (username.equals(colaborador.getNmColaborador())) {
+
+            return this.colaboradorRepository.findById(colaborador.getCdColaborador()).map(pacienteDesatualizada -> {
+                colaborador.setCdColaborador(cdColaborador);
+                colaborador.setPassword(bCryptPasswordEncoder.encode(colaborador.getPassword()));
+                return this.colaboradorRepository.save(colaborador);
+            }).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Falha ao salvar senha do Colaborador"));
+        }
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "usuario não bate com token enviado!");
+
+    }
+
 
 }

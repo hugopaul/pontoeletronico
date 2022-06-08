@@ -1,4 +1,4 @@
-package br.com.imsodontologia.pontoeletronico.controller;
+package br.com.imsodontologia.pontoeletronico.model;
 
 import br.com.imsodontologia.pontoeletronico.model.Perfil;
 import lombok.Data;

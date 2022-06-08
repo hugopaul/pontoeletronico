@@ -1,7 +1,12 @@
 package br.com.imsodontologia.pontoeletronico.security;
 
 import br.com.imsodontologia.pontoeletronico.model.LoginDTO;
+import br.com.imsodontologia.pontoeletronico.model.TokenDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.swagger.v3.core.util.Json;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.json.GsonJsonParser;
+import org.springframework.http.converter.json.GsonBuilderUtils;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -22,6 +27,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     private AuthenticationManager authenticationManager;
 
     private JwtUtil jwtUtil;
+
 
     public JwtAuthenticationFilter(AuthenticationManager authenticationManager, JwtUtil jwtUtil) {
         setAuthenticationFailureHandler(new JWTAuthenticationFailureHandler());
@@ -49,9 +55,12 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                                             FilterChain chain,
                                             Authentication authResult) throws IOException, ServletException {
 
+
         String username = ((UserSS) authResult.getPrincipal()).getUsername();
-        String token = jwtUtil.generateToken(username);
-        response.addHeader("Authorization", "Bearer " + token);
+        TokenDTO tokenDTO = new TokenDTO(username,jwtUtil.generateToken(username) );
+        String json = Json.pretty(tokenDTO);
+        response.getWriter().write(json);
+        response.getWriter().flush();
     }
 
     private class JWTAuthenticationFailureHandler implements AuthenticationFailureHandler {

@@ -47,7 +47,7 @@ public class PontoeletronicoApplication {
 												, "admin", bCryptPasswordEncoder().encode("admin"), "61982615008",
 												Set.of( new Perfil(UUID.fromString("c30bdcaa-e445-11ec-8fea-0242ac000002"), "GERENTE"),
 														new Perfil(UUID.fromString("c30bdcaa-e445-11ec-8fea-0242ac000001"), "USER"),
-														new Perfil(UUID.fromString("c30bdcaa-e445-11ec-8fea-0242ac000015"), "PROPRIETARIO"))));
+														new Perfil(UUID.fromString("c30bdcaa-e445-11ec-8fea-0242ac000015"), "PROPRIETARIO")), false));
 		};
 	}
 

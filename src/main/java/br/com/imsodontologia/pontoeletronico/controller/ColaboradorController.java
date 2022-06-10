@@ -77,8 +77,15 @@ public class ColaboradorController {
     @PutMapping("/setNewPass/{cdColaborador}")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public Colaborador setNewPass(@PathVariable UUID cdColaborador, @RequestBody Colaborador colaborador, HttpServletRequest request) {
-        System.out.println("token --> " + request.getHeader("Authorization").substring(7));
+
         return this.colaboradorService.setNewPass(cdColaborador, colaborador, request.getHeader("Authorization").substring(7));
+    }
+
+    @PreAuthorize("hasAnyRole('GERENTE')")
+    @DeleteMapping("/desativar/{cdColaborador}")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public void desativarColaborador(@PathVariable UUID cdColaborador){
+        this.colaboradorService.desativarColaborador(cdColaborador);
     }
 
 }

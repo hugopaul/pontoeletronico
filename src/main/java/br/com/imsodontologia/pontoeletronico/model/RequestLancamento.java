@@ -8,8 +8,6 @@ import java.util.UUID;
 @Getter @Setter
 public class RequestLancamento {
 
-    private UUID cdColaborador;
-
     private GeolocationPosition geolocationPosition;
 
 

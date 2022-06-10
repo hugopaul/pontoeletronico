@@ -46,5 +46,8 @@ public class Colaborador{
             schema = "pontoeletronico")
     private Set<Perfil> perfis;
 
+    @JsonIgnore
+    private boolean desativado;
+
 
 }

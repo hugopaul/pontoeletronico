@@ -14,6 +14,11 @@ import java.sql.Timestamp;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Coords {
-
-    private GeolocationCoordinates geolocationCoordinates;
+    private String accuracy ;
+    private String altitude;
+    private String altitudeAccuracy;
+    private String heading;
+    private String latitude;
+    private String longitude;
+    private String speed;
 }

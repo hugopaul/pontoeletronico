@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.UUID;
 
 public interface LancamentoService {
-    Lancamento salvarLancamento(RequestLancamento requestLancamento);
+    Lancamento salvarLancamento(RequestLancamento requestLancamento, String token);
 
     List<Lancamento> getAll();
 

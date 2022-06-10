@@ -17,6 +17,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -45,12 +46,19 @@ public class ColaboradorServiceImpl implements ColaboradorService {
 
     @Override
     public List<Colaborador> getAll() {
-        return this.colaboradorRepository.findAll();
+
+        return this.colaboradorRepository.findAll().stream().filter(x -> !x.isDesativado()).collect(Collectors.toList());
     }
 
     @Override
     public Colaborador editarColaborador(UUID cdColaborador, Colaborador colaborador) {
         return this.colaboradorRepository.findById(colaborador.getCdColaborador()).map(pacienteDesatualizada -> {
+            if (colaborador.getPassword().length() > 20){
+                if (!colaborador.getPassword().equals(pacienteDesatualizada.getPassword())){
+                    colaborador.setPassword(pacienteDesatualizada.getPassword());
+                }
+            }
+
             colaborador.setCdColaborador(cdColaborador);
             return this.colaboradorRepository.save(colaborador);
         }).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Falha ao editar Colaborador"));
@@ -100,8 +108,7 @@ public class ColaboradorServiceImpl implements ColaboradorService {
     @Override
     public Colaborador setNewPass(UUID cdColaborador, Colaborador colaborador, String token) {
         String username = jwtUtil.getUsername(token);
-        if (username.equals(colaborador.getNmColaborador())) {
-
+        if (username.equals(colaborador.getUsername())) {
             return this.colaboradorRepository.findById(colaborador.getCdColaborador()).map(pacienteDesatualizada -> {
                 colaborador.setCdColaborador(cdColaborador);
                 colaborador.setPassword(bCryptPasswordEncoder.encode(colaborador.getPassword()));
@@ -110,6 +117,17 @@ public class ColaboradorServiceImpl implements ColaboradorService {
         }
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "usuario não bate com token enviado!");
 
+    }
+
+    @Override
+    public void desativarColaborador(UUID cdColaborador) {
+
+        Colaborador colaborador = this.colaboradorRepository.getById(cdColaborador);
+        if (colaborador==null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Colaborador não encontrado");
+        }
+        colaborador.setDesativado(true);
+        this.colaboradorRepository.save(colaborador);
     }
 
 

@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.UUID;
 
@@ -27,8 +28,9 @@ public class LancamentoController {
     @PreAuthorize("hasRole('USER')")
     @PostMapping
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public Lancamento saveLancamento(@RequestBody RequestLancamento requestLancamento) {
-        return this.lancamentoService.salvarLancamento(requestLancamento);
+    public Lancamento saveLancamento(@RequestBody RequestLancamento requestLancamento, HttpServletRequest request) {
+
+        return this.lancamentoService.salvarLancamento(requestLancamento, request.getHeader("Authorization").substring(7));
     }
     @PreAuthorize("hasAnyRole('USER')")
     @GetMapping("/colaborador/{cdColaborador}")

@@ -28,4 +28,6 @@ public interface ColaboradorService {
     Boolean matchPass(PassMatches passMatches);
 
     Colaborador setNewPass(UUID cdColaborador, Colaborador colaborador, String token);
+
+    void desativarColaborador(UUID cdColaborador);
 }

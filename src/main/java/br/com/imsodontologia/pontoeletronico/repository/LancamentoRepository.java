@@ -12,6 +12,6 @@ import java.util.UUID;
 @Repository
 public interface LancamentoRepository extends JpaRepository<Lancamento, UUID> {
 
-    @Query(value = "SELECT * FROM pontoeletronico.tb_lancamento WHERE cd_colaborador = :cdColaborador ", nativeQuery = true)
+    @Query(value = "SELECT * FROM pontoeletronico.tb_lancamento WHERE cd_colaborador = :cdColaborador and dh_marcacao between (NOW() - interval '24 hours') and now() ", nativeQuery = true)
     List<Lancamento> findAllByCdColaborador(@Param("cdColaborador") UUID cdColaborador);
 }

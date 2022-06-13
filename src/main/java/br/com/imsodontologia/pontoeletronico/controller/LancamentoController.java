@@ -29,14 +29,13 @@ public class LancamentoController {
     @PostMapping
     @ResponseStatus(HttpStatus.ACCEPTED)
     public Lancamento saveLancamento(@RequestBody RequestLancamento requestLancamento, HttpServletRequest request) {
-
         return this.lancamentoService.salvarLancamento(requestLancamento, request.getHeader("Authorization").substring(7));
     }
     @PreAuthorize("hasAnyRole('USER')")
-    @GetMapping("/colaborador/{cdColaborador}")
+    @GetMapping("/colaborador")
     @ResponseStatus(HttpStatus.OK)
-    public List<Lancamento> getLancamentosByColaborador(@PathVariable UUID cdColaborador) {
-        return this.lancamentoService.findByCdColaborador(cdColaborador);
+    public List<Lancamento> getLancamentosByColaborador(HttpServletRequest request) {
+        return this.lancamentoService.findByCdColaborador(request.getHeader("Authorization").substring(7));
     }
 
     @PreAuthorize("hasAnyRole('USER')")

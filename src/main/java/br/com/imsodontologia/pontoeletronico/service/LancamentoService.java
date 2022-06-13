@@ -12,7 +12,7 @@ public interface LancamentoService {
 
     List<Lancamento> getAll();
 
-    List<Lancamento> findByCdColaborador(UUID cdColaborador);
+    List<Lancamento> findByCdColaborador(String token);
 
     Lancamento editarLancamento(UUID cdLancamento, Lancamento oldLancamento);
 

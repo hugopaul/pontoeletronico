@@ -24,7 +24,7 @@ import java.util.UUID;
 public class LancamentoServiceImpl implements LancamentoService {
 
     @Autowired
-    private final LancamentoRepository repository;
+    private final LancamentoRepository lancamentoRepository;
 
     @Autowired
     private final ColaboradorRepository colaboradorRepository;
@@ -34,13 +34,14 @@ public class LancamentoServiceImpl implements LancamentoService {
 
 
     public LancamentoServiceImpl(LancamentoRepository repository, ColaboradorRepository colaboradorRepository) {
-        this.repository = repository;
+        this.lancamentoRepository = repository;
         this.colaboradorRepository = colaboradorRepository;
     }
 
 
     @Override
     public Lancamento salvarLancamento(RequestLancamento requestLancamento, String token) {
+        validarLancamento(requestLancamento);
 
         String username = jwtUtil.getUsername(token);
         Optional<Colaborador> colaborador = this.colaboradorRepository.findByUsername(username);
@@ -48,40 +49,59 @@ public class LancamentoServiceImpl implements LancamentoService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Colaborador não encontrado");
         } else {
             Lancamento lancamento = new Lancamento();
-            lancamento.setLatitude(requestLancamento.getGeolocationPosition().getCoords().getLatitude());
-            lancamento.setLongitude(requestLancamento.getGeolocationPosition().getCoords().getLongitude());
             lancamento.setCdColaborador(colaborador.get());
-            lancamento.setDhMarcacao(requestLancamento.getGeolocationPosition().getTimestamp());
+            lancamento.setLatitude(requestLancamento.getLatitude());
+            lancamento.setLongitude(requestLancamento.getLongitude());
+            lancamento.setDhMarcacao(requestLancamento.getTimestamp());
             lancamento.setValid(true);
-            log.info("Lançamento ----> " + lancamento);
-            return this.repository.save(lancamento);
+            return this.lancamentoRepository.save(lancamento);
+        }
+
+    }
+
+    private void validarLancamento(RequestLancamento requestLancamento) {
+        if (requestLancamento.getLatitude().isEmpty() || requestLancamento.getLatitude() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Erro ao processar Lançamento: Latitude is Empty");
+        }
+        if (requestLancamento.getLongitude().isEmpty() || requestLancamento.getLongitude() == null) {
+
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Erro ao processar Lançamento: Longitude is Empty");
+        }
+    }
+
+    @Override
+    public List<Lancamento> getAll() {
+        return this.lancamentoRepository.findAll();
+    }
+
+    @Override
+    public List<Lancamento> findByCdColaborador(String token) {
+        String username = jwtUtil.getUsername(token);
+        Optional<Colaborador> colaborador = this.colaboradorRepository.findByUsername(username);
+        if (colaborador.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Colaborador não encontrado");
+        } else {
+
+
+            return this.lancamentoRepository.findAllByCdColaborador(colaborador.get().getCdColaborador());
+
+
+
         }
 
     }
 
     @Override
-    public List<Lancamento> getAll() {
-        return this.repository.findAll();
-    }
-
-    @Override
-    public List<Lancamento> findByCdColaborador(UUID cdColaborador) {
-        return this.repository.findAllByCdColaborador(cdColaborador);
-    }
-
-    @Override
     public Lancamento editarLancamento(UUID cdLancamento, Lancamento newLancamento) {
-        return repository.findById(newLancamento.getCdLancamento()).map(
-                pacienteDesatualizada -> {
-                    newLancamento.setCdLancamento(cdLancamento);
-                    return repository.save(newLancamento);
-                }).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Lancamento não encontrado!"));
+        return lancamentoRepository.findById(newLancamento.getCdLancamento()).map(pacienteDesatualizada -> {
+            newLancamento.setCdLancamento(cdLancamento);
+            return lancamentoRepository.save(newLancamento);
+        }).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Lancamento não encontrado!"));
     }
 
     @Override
     public Lancamento findByCdLancamento(UUID cdLancamento) {
-        Lancamento lancamento = this.repository.findById(cdLancamento).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Lancamento não encontrado!"));
+        Lancamento lancamento = this.lancamentoRepository.findById(cdLancamento).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Lancamento não encontrado!"));
 
 
         return lancamento;
@@ -89,8 +109,7 @@ public class LancamentoServiceImpl implements LancamentoService {
 
     @Override
     public Lancamento getLancamentoOfColaboradorByCdLancamento(UUID cdColaborador, UUID cdLancamento) {
-        Lancamento lancamento = this.repository.findById(cdLancamento).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Lancamento não encontrado!"));
+        Lancamento lancamento = this.lancamentoRepository.findById(cdLancamento).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Lancamento não encontrado!"));
         if (lancamento.getCdColaborador().getCdColaborador().equals(cdColaborador)) {
             return lancamento;
         }

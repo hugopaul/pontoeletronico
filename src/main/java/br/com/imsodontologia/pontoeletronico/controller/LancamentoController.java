@@ -1,6 +1,7 @@
 package br.com.imsodontologia.pontoeletronico.controller;
 
 import br.com.imsodontologia.pontoeletronico.model.Lancamento;
+import br.com.imsodontologia.pontoeletronico.model.MeusLancamentosConcatenados;
 import br.com.imsodontologia.pontoeletronico.model.RequestLancamento;
 import br.com.imsodontologia.pontoeletronico.service.LancamentoService;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +16,7 @@ import java.util.UUID;
 
 @Slf4j
 @RestController
-@RequestMapping("/lancamento")
+@RequestMapping("/lancamentos")
 public class LancamentoController {
 
     private final LancamentoService lancamentoService;
@@ -25,12 +26,17 @@ public class LancamentoController {
         this.lancamentoService = service;
     }
 
+    // SALVAR LANÇAMENTO ----> PAGE REGISTRAR PONTO
     @PreAuthorize("hasRole('USER')")
     @PostMapping
     @ResponseStatus(HttpStatus.ACCEPTED)
     public Lancamento saveLancamento(@RequestBody RequestLancamento requestLancamento, HttpServletRequest request) {
         return this.lancamentoService.salvarLancamento(requestLancamento, request.getHeader("Authorization").substring(7));
     }
+
+
+
+    // GET LANÇAMENTOS IN LAST 24 HOURS ----> PAGE REGISTRAR PONTO
     @PreAuthorize("hasAnyRole('USER')")
     @GetMapping("/colaborador")
     @ResponseStatus(HttpStatus.OK)
@@ -38,34 +44,15 @@ public class LancamentoController {
         return this.lancamentoService.findByCdColaborador(request.getHeader("Authorization").substring(7));
     }
 
+
     @PreAuthorize("hasAnyRole('USER')")
-    @GetMapping("/colaborador/{cdColaborador}/{cdLancamento}")
+    @GetMapping("/getMeusLancamentosConcatenados")
     @ResponseStatus(HttpStatus.OK)
-    public Lancamento getLancamentoOfColaboradorByCdLancamento(@PathVariable UUID cdColaborador, @PathVariable UUID cdLancamento) {
-        return this.lancamentoService.getLancamentoOfColaboradorByCdLancamento(cdColaborador, cdLancamento);
-    }
-
-    @PreAuthorize("hasAnyRole('GERENTE')")
-    @GetMapping("/all")
-    @ResponseStatus(HttpStatus.OK)
-    public List<Lancamento> getAll() {
-        return this.lancamentoService.getAll();
+    public List<Object> getMeusLancamentosConcatenados(HttpServletRequest request){
+        return this.lancamentoService.getMeusLancamentosConcatenados(request.getHeader("Authorization").substring(7));
     }
 
 
 
-    @PreAuthorize("hasAnyRole('GERENTE')")
-    @GetMapping("/{cdLancamento}")
-    @ResponseStatus(HttpStatus.OK)
-    public Lancamento getLancamento(@PathVariable UUID cdLancamento) {
-        return this.lancamentoService.findByCdLancamento(cdLancamento);
-    }
-
-    @PreAuthorize("hasAnyRole('PROPRIETARIO')")
-    @PutMapping("/{cdLancamento}")
-    @ResponseStatus(HttpStatus.OK)
-    public Lancamento editarLancamento(@PathVariable UUID cdLancamento, @RequestBody Lancamento oldLancamento) {
-        return this.lancamentoService.editarLancamento(cdLancamento, oldLancamento);
-    }
 
 }

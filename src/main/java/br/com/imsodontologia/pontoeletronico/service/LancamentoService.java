@@ -14,4 +14,6 @@ public interface LancamentoService {
     List<Lancamento> findByCdColaborador(String token);
 
     List<Object> getMeusLancamentosConcatenados(String authorization);
+
+    List<Object> getAllLancamentos(String authorization);
 }

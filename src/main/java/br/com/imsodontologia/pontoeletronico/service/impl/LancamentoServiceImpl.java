@@ -92,4 +92,16 @@ public class LancamentoServiceImpl implements LancamentoService {
                  return this.lancamentoRepository.getAllLancamentosConcatenadosByColaborador(colaborador.get().getCdColaborador());
             }
         }
+
+    @Override
+    public List<Object> getAllLancamentos(String authorization) {
+        String username = jwtUtil.getUsername(authorization);
+        Optional<Colaborador> colaborador = this.colaboradorRepository.findByUsername(username);
+        if (colaborador.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Colaborador não encontrado");
+        } else {
+            return this.lancamentoRepository.getAllLancamentosConcatenados();
+        }
     }
+
+}

@@ -51,6 +51,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 //.antMatchers(HttpMethod.GET, "/lancamento/all", "/lancamento/**").hasRole("GERENTE")
                 //.antMatchers("/**").hasRole("PROPRIETARIO")
                 .antMatchers(HttpMethod.POST, "/login").permitAll()
+                .antMatchers(HttpMethod.GET, "/actuator/*").permitAll()
                 .anyRequest().authenticated();
                         //.anyRequest().permitAll();
         httpSecurity.cors().and().csrf().disable();
@@ -64,7 +65,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         List<String> all = Arrays.asList("*");
 
         CorsConfiguration corsConfiguration = new CorsConfiguration();
-        corsConfiguration.setAllowedOrigins(List.of("http://localhost:4200"));
+        corsConfiguration.setAllowedOrigins(List.of("http://solidtechsolutions.com.br","http://solidtechsolutions.com.br"));
         corsConfiguration.setAllowedHeaders(all);
         corsConfiguration.setAllowedMethods(all);
         corsConfiguration.setAllowCredentials(true);

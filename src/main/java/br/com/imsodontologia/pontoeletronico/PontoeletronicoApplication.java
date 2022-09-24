@@ -29,7 +29,7 @@ public class PontoeletronicoApplication {
 	private PerfilRepository perfilRepository;
 
 	public static void main(String[] args) {
-
+		System.setProperty("server.servlet.context-path", "/pontoeletronico/api");
 		SpringApplication.run(PontoeletronicoApplication.class, args);
 	}
 

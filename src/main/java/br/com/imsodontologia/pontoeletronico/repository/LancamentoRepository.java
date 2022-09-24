@@ -23,4 +23,13 @@ public interface LancamentoRepository extends JpaRepository<Lancamento, UUID> {
             "group by dia) as b",nativeQuery = true)
     List<Object> getAllLancamentosConcatenadosByColaborador(@Param("cdColaborador") UUID cdColaborador);
 
+    @Query(value = "select nm_colaborador, dia, lancamentos \n" +
+            "from (select nm_colaborador, to_char(a.dh_marcacao, 'dd/MM/yyyy')  as dia , \n" +
+            "  string_agg(to_char(a.dh_marcacao, 'HH24:mm:SS'), ' - ') as lancamentos\n" +
+            "         from (select a.dh_marcacao, a.cd_colaborador,  b.nm_colaborador\n" +
+            "  from pontoeletronico.tb_lancamento as a\n" +
+            "   inner join pontoeletronico.tb_colaborador as b on a.cd_colaborador =  b.cd_colaborador\n" +
+            "  order by dh_marcacao asc) as a\n" +
+            "            group by dia, nm_colaborador) as b",nativeQuery = true)
+    List<Object> getAllLancamentosConcatenados();
 }

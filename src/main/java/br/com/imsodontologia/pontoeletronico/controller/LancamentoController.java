@@ -52,7 +52,12 @@ public class LancamentoController {
         return this.lancamentoService.getMeusLancamentosConcatenados(request.getHeader("Authorization").substring(7));
     }
 
-
+    @PreAuthorize("hasAnyRole('GERENTE')")
+    @GetMapping
+    @ResponseStatus(HttpStatus.OK)
+    public List<Object> getAllLancamentos(HttpServletRequest request) {
+        return this.lancamentoService.getAllLancamentos(request.getHeader("Authorization").substring(7));
+    }
 
 
 }
